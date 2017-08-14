@@ -16,7 +16,6 @@ lwjPNG: done in 0.02531405s
 ImageIO read in 0.10986439s
 ```
 **lwjPNG v0.01**
-* Initial release
 * Support for 24 & 32 bit PNG, interlaced or not
 * Rescalle, see function ByteBuffer scale(int, int)
 * For more details, see Test.java
