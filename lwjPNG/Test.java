@@ -43,7 +43,7 @@ public class Test {
 			ByteBuffer buf = null;
 			int wN = 1, hN = 1;
 
-			lwjPNG.LwjPNG.init(fr); // initialize PNG reading
+			lwjPNG.LwjPNG.init(fr, true); // initialize PNG reading
 
 			int w = lwjPNG.LwjPNG.getWidth(), h = lwjPNG.LwjPNG.getHeight();
 			boolean isPow2 = true;

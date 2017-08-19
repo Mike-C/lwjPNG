@@ -4,6 +4,11 @@ You are using this software at your own risk. Author does not bear any responsib
 
 Version notes:
 
+lwjPNG v0.02
+* Partial image read (image info)
+* Minor speed improvement
+* Bug fix for ByteBuffer position not set in interlace mode
+
 lwjPNG v0.01
 * Initial release
 * Support for 24 & 32 bit PNG, interlaced or not

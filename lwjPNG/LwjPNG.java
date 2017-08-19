@@ -32,8 +32,8 @@ public class LwjPNG {
 	private static byte[] imgData = null, header = new byte[5];
 	private static ByteBuffer buf = null;
 
-	public static void init(InputStream in) throws IOException {
-		readChunks(new DataInputStream(in));
+	public static void init(InputStream in, boolean fullRead) throws IOException {
+		readChunks(new DataInputStream(in), fullRead);
 	}
 
 	public static ByteBuffer scale(int fw, int fh) {
@@ -41,18 +41,14 @@ public class LwjPNG {
 			buf.clear();
 		ByteBuffer bb = ByteBuffer.allocateDirect(cs);
 		getImage(bb);
-		int oI = 0, i = 0, bpx = 4;
+		int i = 0, bpx = 4;
 		float dx = w / (float) fw, dy = h / (float) fh;
 		buf = ByteBuffer.allocateDirect(4 * fw * fh);
 		for (float y = 0; y < h; y += dy) {
 			for (float x = 0; x < w; x += dx) {
-				oI = (i + (int) x) * bpx;
-				buf.put(bb.get(oI));
-				buf.put(bb.get(oI + 1));
-				buf.put(bb.get(oI + 2));
-				buf.put(bb.get(oI + 3));
+				buf.putInt(bb.getInt((i + (int) x) * bpx));
 			}
-			i = (w * (int) y);
+			i = w * (int) y;
 		}
 		bb.clear();
 		buf.flip();
@@ -68,16 +64,16 @@ public class LwjPNG {
 		return buf;
 	}
 
-	private static void readChunks(DataInputStream in) throws IOException {
-		if (in.available() > 4)
+	private static void readChunks(DataInputStream in, boolean all) throws IOException {
+		if (imgData == null && in.available() > 4)
 			in.readLong(); // PNG signature
-		else {
+		else if (imgData == null) {
 			w = 0;
 			return;
 		}
 		dataLen = 0;
 		int chunkType = 0;
-		for (;;) {
+		do {
 			int chunkLen = in.readInt(); // Read the chunk length.
 			if (chunkLen <= 0 || chunkLen > 99998192)
 				break;
@@ -100,7 +96,7 @@ public class LwjPNG {
 				dataLen += chunkLen;
 			}
 			in.readInt(); // checksum skip
-		}
+		} while (all);
 	}
 
 	public static int getWidth() {
@@ -132,14 +128,14 @@ public class LwjPNG {
 	}
 
 	private static int ab(int a) { // absolute value
-		return (a ^ (a >> 8)) + ((a >> 8) & 1);
+		int b = a >> 8;
+		return (a ^ b) - b;
 	}
 
 	private static int paethP(int a, int b, int c) {
-		int pa = b - c, pb = a - c, pc = pa + pb;
+		int pa = b - c, pb = a - c, pc = ab(pa + pb);
 		pa = ab(pa);
 		pb = ab(pb);
-		pc = ab(pc);
 		return (pa <= pb && pa <= pc) ? a : (pb <= pc) ? b : c;
 	}
 
@@ -165,11 +161,11 @@ public class LwjPNG {
 
 		for (int p = 0; p < in; p++) { // interlace passes..
 			v = sw[p] + 1; // scanLine width
-			byte[] row0 = new byte[v], row = new byte[v]; // every row contains filter byte!!!!
+			byte[] row0 = new byte[wT + 1], row = new byte[wT + 1]; // every row contains filter byte!!!!
 			oI = oH[p] + (oV[p] * wT); // start oI position
 			for (int i = 1, s = 0; s < sp[p]; i = 1, s++) { // scanLine
 				try {
-					inflater.inflate(row);
+					inflater.inflate(row, 0, v);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -184,7 +180,7 @@ public class LwjPNG {
 						}
 					} else if (row[0] == 3) {
 						for (; i < bPx + 1; i++) {
-							row[i] += ((row0[i] & 0xFF)) >>> 1;
+							row[i] += (row0[i] & 0xFF) >>> 1;
 						}
 						for (; i < v; i++) {
 							row[i] += ((row0[i] & 0xFF) + (row[i - bPx] & 0xFF)) >>> 1;
@@ -198,28 +194,22 @@ public class LwjPNG {
 						}
 					}
 				}
+				ByteBuffer wRow = ByteBuffer.wrap(row);
 				if (in == 1) { // format output, normal mode
-					if (bPx == 3)
+					if (bPx == 3) {
 						for (i = 1; i < v; i += bPx) {
-							bb.put(row, i, 3);
-							bb.put((byte) -1);
+							bb.putInt((wRow.getInt(i) & 0xFFFFFF00) + 0xFF);
 						}
-					else
+					} else
 						bb.put(row, 1, v - 1);
 				} else { // interlaced mode, or normal mode
 					if (bPx == 3)
 						for (i = 1; i < v; i += bPx, oI += rH[p] + 4) {
-							bb.put(oI, row[i]);
-							bb.put(oI + 1, row[i + 1]);
-							bb.put(oI + 2, row[i + 2]);
-							bb.put(oI + 3, (byte) -1);
+							bb.putInt(oI, (wRow.getInt(i) & 0xFFFFFF00) + 0xFF);
 						}
 					else
 						for (i = 1; i < v; i += bPx, oI += rH[p] + 4) {
-							bb.put(oI, row[i]);
-							bb.put(oI + 1, row[i + 1]);
-							bb.put(oI + 2, row[i + 2]);
-							bb.put(oI + 3, row[i + 3]);
+							bb.putInt(oI, wRow.getInt(i));
 						}
 				}
 				byte[] swap = row0;
@@ -229,6 +219,7 @@ public class LwjPNG {
 				oI = oH[p] + (oV[p] * wT) + ((rV[p] * wT) * (s + 1));
 			} // for scanLine
 		}
+		bb.position(bb.capacity());
 		imgData = null;
 	}
 }
