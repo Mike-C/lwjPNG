@@ -32,10 +32,10 @@ Now you can read whole image, by:
  int w = lwjPNG.LwjPNG.getWidth(), h = lwjPNG.LwjPNG.getHeight();
  
  // than read rest of the data
- lwjPNG.LwjPNG.init(fr, true);
+ lwjPNG.LwjPNG.init(inputStream, true);
  
  // and decode, scale
- ByteBuffer buffer = lwjPNG.LwjPNG.decode(/*in*/);
+ ByteBuffer buffer = lwjPNG.LwjPNG.decode();
 ```
 * Minor speed improvement
 * Bug fix for ByteBuffer position not set in interlace mode
