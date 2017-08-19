@@ -15,6 +15,31 @@ reading image.png:
 lwjPNG: done in 0.02531405s
 ImageIO read in 0.10986439s
 ```
+**Release notes**
+
+**lwjPNG v0.02**
+* Partial image read (image info).
+Now you can read whole image, by:
+```java
+ lwjPNG.LwjPNG.init(inputStream, true);
+```
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; And than decode it, or you can call:
+```java
+ // read image information
+ lwjPNG.LwjPNG.init(inputStream, false);
+ 
+ // now you can get it's dimension
+ int w = lwjPNG.LwjPNG.getWidth(), h = lwjPNG.LwjPNG.getHeight();
+ 
+ // than read rest of the data
+ lwjPNG.LwjPNG.init(fr, true);
+ 
+ // and decode, scale
+ ByteBuffer buffer = lwjPNG.LwjPNG.decode(/*in*/);
+```
+* Minor speed improvement
+* Bug fix for ByteBuffer position not set in interlace mode
+
 **lwjPNG v0.01**
 * Support for 24 & 32 bit PNG, interlaced or not
 * Rescalle, see function ByteBuffer scale(int, int)
