@@ -28,12 +28,33 @@ import java.util.zip.Inflater;
 
 public class LwjPNG {
 
-	private static int w, h, dataLen, cs; // cs: chunk size
+	private static int w, h, sW, sH, dataLen, cs; // cs: chunk size
 	private static byte[] imgData = null, header = new byte[5];
 	private static ByteBuffer buf = null;
 
 	public static void init(InputStream in, boolean fullRead) throws IOException {
 		readChunks(new DataInputStream(in), fullRead);
+	}
+
+	//returns ARGB colour at (x, y) as int
+	public static int getRGB(int x, int y) {
+		int bpx = 4;
+		if(buf == null || buf.capacity() < (sW * sH * bpx) || 
+				x >= sW || y >= sH || x < 0 || y < 0) return 0;
+		else {
+			int c = buf.getInt((x + (y * sW)) * bpx);
+			return (c << 24) | (c >>> 8);
+		}
+	}
+	
+	//sets ARGB colour at (x, y) as int
+	public static void setRGB(int x, int y, int argb) {
+		int bpx = 4;
+		if(buf == null || buf.capacity() < (sW * sH * bpx) || 
+				x >= sW || y >= sH || x < 0 || y < 0) return;
+		else {
+			buf.putInt((x + (y * sW)) * bpx, (argb >>> 24) | (argb << 8));
+		}
 	}
 
 	public static ByteBuffer scale(int fw, int fh) {
@@ -43,7 +64,7 @@ public class LwjPNG {
 		getImage(bb);
 		int i = 0, bpx = 4;
 		float dx = w / (float) fw, dy = h / (float) fh;
-		buf = ByteBuffer.allocateDirect(4 * fw * fh);
+		buf = ByteBuffer.allocateDirect(bpx * fw * fh);
 		for (float y = 0; y < h; y += dy) {
 			for (float x = 0; x < w; x += dx) {
 				buf.putInt(bb.getInt((i + (int) x) * bpx));
@@ -52,6 +73,8 @@ public class LwjPNG {
 		}
 		bb.clear();
 		buf.flip();
+		sW = fw; //scaled Width
+		sH = fh; //scaled Height
 		return buf;
 	}
 
@@ -60,7 +83,10 @@ public class LwjPNG {
 			buf.clear();
 		buf = ByteBuffer.allocateDirect(cs);
 		getImage(buf);
+		imgData = null; // can't run decode() again
 		buf.flip();
+		sW = w; //temporary Width
+		sH = h; //temporary Height
 		return buf;
 	}
 
@@ -68,7 +94,7 @@ public class LwjPNG {
 		if (imgData == null && in.available() > 4)
 			in.readLong(); // PNG signature
 		else if (imgData == null) {
-			w = 0;
+			w = h = 0;
 			return;
 		}
 		dataLen = 0;
@@ -216,10 +242,9 @@ public class LwjPNG {
 				row0 = row;
 				row = swap;
 				// start oI position, increased by current scanline's iteration offset
-				oI = oH[p] + (oV[p] * wT) + ((rV[p] * wT) * (s + 1));
+				oI = oH[p] + ((oV[p] + (rV[p] * (s + 1))) * wT);
 			} // for scanLine
 		}
 		bb.position(bb.capacity());
-		imgData = null;
 	}
 }
