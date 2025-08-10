@@ -17,6 +17,14 @@ ImageIO read in 0.10986439s
 ```
 **Release notes**
 
+**lwjPNG v0.03**
+* Added methods to get and set ARGB color as int at position (x, y).
+```java
+ // after reading the image through decode(), or scale(w, h)
+ int x = 0, y = 0, argb = lwjPNG.LwjPNG.getRGB(x, y);
+ lwjPNG.LwjPNG.setRGB(x, y, argb)
+```
+
 **lwjPNG v0.02**
 * Partial image read (image info).
 Now you can read whole image, by:
