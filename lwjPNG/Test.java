@@ -40,12 +40,13 @@ public class Test {
 
 			FileInputStream fin = new FileInputStream(new File(fileName));
 			BufferedInputStream fr = new BufferedInputStream(fin, 32768);
+			LwjPNG png = new LwjPNG(fr);
 			ByteBuffer buf = null;
 			int wN = 1, hN = 1;
 
-			lwjPNG.LwjPNG.init(fr, true); // initialize PNG reading
+			png.init(true); // initialize PNG reading
 
-			int w = lwjPNG.LwjPNG.getWidth(), h = lwjPNG.LwjPNG.getHeight();
+			int w = png.getWidth(), h = png.getHeight();
 			boolean isPow2 = true;
 			while (w > 1) {
 				wN *= 2;
@@ -60,17 +61,17 @@ public class Test {
 				h /= 2;
 			}
 
-			System.out.println(" " + lwjPNG.LwjPNG.getWidth() + "x" + lwjPNG.LwjPNG.getHeight() + "px;");
+			System.out.println(" " + png.getWidth() + "x" + png.getHeight() + "px;");
 			System.out.println(" image size power of 2: " + isPow2 + ";");
 			if (!isPow2)
 				System.out.println("  => downscalling: " + wN + "x" + hN + "px;");
-			System.out.println(" Bit depth: " + (lwjPNG.LwjPNG.getColorType() == 2 ? 3 * 8 : 4 * 8) + "bit;");
-			System.out.println(" interlace: " + lwjPNG.LwjPNG.getInterlace() + ";");
+			System.out.println(" Bit depth: " + (png.getColorType() == 2 ? 3 * 8 : 4 * 8) + "bit;");
+			System.out.println(" interlace: " + png.getInterlace() + ";");
 
 			if (!isPow2) {
-				buf = lwjPNG.LwjPNG.scale(wN, hN); // new width & height
+				buf = png.scale(wN, hN); // new width & height
 			} else {
-				buf = lwjPNG.LwjPNG.decode();
+				buf = png.decode();
 			}
 
 			fin.close();

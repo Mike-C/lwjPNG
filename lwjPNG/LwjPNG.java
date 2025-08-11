@@ -28,16 +28,21 @@ import java.util.zip.Inflater;
 
 public class LwjPNG {
 
-	private static int w, h, sW, sH, dataLen, cs; // cs: chunk size
-	private static byte[] imgData = null, header = new byte[5];
-	private static ByteBuffer buf = null;
+	private int w, h, sW, sH, dataLen, cs; // cs: chunk size
+	private byte[] imgData = null, header = new byte[5];
+	private ByteBuffer buf = null;
+	private InputStream inputStream;
+	
+	public LwjPNG(InputStream inputStream) {
+		this.inputStream = inputStream;
+	}
 
-	public static void init(InputStream in, boolean fullRead) throws IOException {
-		readChunks(new DataInputStream(in), fullRead);
+	public void init(boolean fullRead) throws IOException {
+		readChunks(new DataInputStream(inputStream), fullRead);
 	}
 
 	//returns ARGB colour at (x, y) as int
-	public static int getRGB(int x, int y) {
+	public int getRGB(int x, int y) {
 		int bpx = 4;
 		if(buf == null || buf.capacity() < (sW * sH * bpx) || 
 				x >= sW || y >= sH || x < 0 || y < 0) return 0;
@@ -48,7 +53,7 @@ public class LwjPNG {
 	}
 	
 	//sets ARGB colour at (x, y) as int
-	public static void setRGB(int x, int y, int argb) {
+	public void setRGB(int x, int y, int argb) {
 		int bpx = 4;
 		if(buf == null || buf.capacity() < (sW * sH * bpx) || 
 				x >= sW || y >= sH || x < 0 || y < 0) return;
@@ -57,7 +62,7 @@ public class LwjPNG {
 		}
 	}
 
-	public static ByteBuffer scale(int fw, int fh) {
+	public ByteBuffer scale(int fw, int fh) {
 		if (buf != null)
 			buf.clear();
 		ByteBuffer bb = ByteBuffer.allocateDirect(cs);
@@ -78,7 +83,7 @@ public class LwjPNG {
 		return buf;
 	}
 
-	public static ByteBuffer decode() {
+	public ByteBuffer decode() {
 		if (buf != null)
 			buf.clear();
 		buf = ByteBuffer.allocateDirect(cs);
@@ -89,7 +94,7 @@ public class LwjPNG {
 		return buf;
 	}
 
-	private static void readChunks(DataInputStream in, boolean all) throws IOException {
+	private void readChunks(DataInputStream in, boolean all) throws IOException {
 		if (imgData == null && in.available() > 4)
 			in.readLong(); // PNG signature
 		else if (imgData == null) {
@@ -124,31 +129,31 @@ public class LwjPNG {
 		} while (all);
 	}
 
-	public static int getWidth() {
+	public int getWidth() {
 		return w;
 	}
 
-	public static int getHeight() {
+	public int getHeight() {
 		return h;
 	}
 
-	public static short getBitsPerPixel() {
+	public short getBitsPerPixel() {
 		return (short) (header[0] & 0xFF);
 	}
 
-	public static short getColorType() {
+	public short getColorType() {
 		return (short) (header[1] & 0xFF);
 	}
 
-	public static short getCompression() {
+	public short getCompression() {
 		return (short) (header[2] & 0xFF);
 	}
 
-	public static short getFilter() {
+	public short getFilter() {
 		return (short) (header[3] & 0xFF);
 	}
 
-	public static short getInterlace() {
+	public short getInterlace() {
 		return (short) (header[4] & 0xFF);
 	}
 
@@ -164,7 +169,7 @@ public class LwjPNG {
 		return (pa <= pb && pa <= pc) ? a : (pb <= pc) ? b : c;
 	}
 
-	private static void getImage(ByteBuffer bb) {
+	private void getImage(ByteBuffer bb) {
 		// bPx bytes per pixel, in interlace, wT total output width, v scanline width
 		// oH - output offset start horizontal; oV - output offset start vertical
 		// rH - repetitions horizontal (rH[p]-1) << 2; rV - repetitions vertical
