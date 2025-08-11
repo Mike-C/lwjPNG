@@ -17,6 +17,24 @@ ImageIO read in 0.10986439s
 ```
 **Release notes**
 
+**lwjPNG v0.05**
+* class LwjPNG is now instantiated, for better OOP.
+Usage example follows:
+```java
+ LwjPNG png = new LwjPNG(inputStream);
+
+ png.init(false); //read png file header only
+ int w = png.getWidth(), h = png.getHeight();
+
+ // than read rest of the data
+ png.init(true);
+
+ // and decode, scale etc.
+ // after decoding or scaling getRGB(x, y); 
+ // and setRGBgetRGB(x, y, argb); can be called
+ ByteBuffer buffer = png.decode();
+```
+
 **lwjPNG v0.04**
 * Bug fix for imgData not nulled in scale(..)
 * Minor optimization
@@ -54,6 +72,6 @@ Now you can read whole image, by:
 
 **lwjPNG v0.01**
 * Support for 24 & 32 bit PNG, interlaced or not
-* Rescalle, see function ByteBuffer scale(int, int)
+* Rescale, see function ByteBuffer scale(int, int)
 * For more details, see Test.java
 * GNU General Public License v2.0
