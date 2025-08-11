@@ -61,7 +61,7 @@ public class LwjPNG {
 		if (buf != null)
 			buf.clear();
 		ByteBuffer bb = ByteBuffer.allocateDirect(cs);
-		getImage(bb);
+		getImage(bb); //imgData = null, can't re-run scale(..)
 		int i = 0, bpx = 4;
 		float dx = w / (float) fw, dy = h / (float) fh;
 		buf = ByteBuffer.allocateDirect(bpx * fw * fh);
@@ -82,8 +82,7 @@ public class LwjPNG {
 		if (buf != null)
 			buf.clear();
 		buf = ByteBuffer.allocateDirect(cs);
-		getImage(buf);
-		imgData = null; // can't run decode() again
+		getImage(buf); //imgData = null, can't re-run decode()
 		buf.flip();
 		sW = w; //temporary Width
 		sH = h; //temporary Height
@@ -224,14 +223,14 @@ public class LwjPNG {
 				if (in == 1) { // format output, normal mode
 					if (bPx == 3) {
 						for (i = 1; i < v; i += bPx) {
-							bb.putInt((wRow.getInt(i) & 0xFFFFFF00) + 0xFF);
+							bb.putInt(wRow.getInt(i) | 0xFF);
 						}
 					} else
 						bb.put(row, 1, v - 1);
 				} else { // interlaced mode, or normal mode
 					if (bPx == 3)
 						for (i = 1; i < v; i += bPx, oI += rH[p] + 4) {
-							bb.putInt(oI, (wRow.getInt(i) & 0xFFFFFF00) + 0xFF);
+							bb.putInt(oI, wRow.getInt(i) | 0xFF);
 						}
 					else
 						for (i = 1; i < v; i += bPx, oI += rH[p] + 4) {
@@ -246,5 +245,6 @@ public class LwjPNG {
 			} // for scanLine
 		}
 		bb.position(bb.capacity());
+		imgData = null;
 	}
 }
