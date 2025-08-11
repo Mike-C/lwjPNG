@@ -17,6 +17,10 @@ ImageIO read in 0.10986439s
 ```
 **Release notes**
 
+**lwjPNG v0.04**
+* Bug fix for imgData not nulled in scale(..)
+* Minor optimization
+
 **lwjPNG v0.03**
 * Added methods to get and set ARGB color as int at position (x, y).
 ```java
