@@ -40,11 +40,9 @@ public class Test {
 
 			FileInputStream fin = new FileInputStream(new File(fileName));
 			BufferedInputStream fr = new BufferedInputStream(fin, 32768);
-			LwjPNG png = new LwjPNG(fr);
+			LwjPNG png = new LwjPNG(fr, false); // false - read only image header
 			ByteBuffer buf = null;
 			int wN = 1, hN = 1;
-
-			png.init(true); // initialize PNG reading
 
 			int w = png.getWidth(), h = png.getHeight();
 			boolean isPow2 = true;
@@ -68,10 +66,12 @@ public class Test {
 			System.out.println(" Bit depth: " + (png.getColorType() == 2 ? 3 * 8 : 4 * 8) + "bit;");
 			System.out.println(" interlace: " + png.getInterlace() + ";");
 
+			png.init(true); // fully read rest of compressed PNG data
+			
 			if (!isPow2) {
 				buf = png.scale(wN, hN); // new width & height
 			} else {
-				buf = png.decode();
+				buf = png.decode(); // decode PNG data into ByteBuffer
 			}
 
 			fin.close();

@@ -33,8 +33,14 @@ public class LwjPNG {
 	private ByteBuffer buf = null;
 	private InputStream inputStream;
 	
-	public LwjPNG(InputStream inputStream) {
+	public LwjPNG(InputStream inputStream) throws IOException {
 		this.inputStream = inputStream;
+        init(true); // automatic full read of image header and image data
+	}
+	
+	public LwjPNG(InputStream inputStream, boolean fullRead) throws IOException {
+		this.inputStream = inputStream;
+        init(fullRead); // optional partial read of image header only
 	}
 
 	public void init(boolean fullRead) throws IOException {
