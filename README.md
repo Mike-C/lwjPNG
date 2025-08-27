@@ -17,6 +17,23 @@ ImageIO read in 0.10986439s
 ```
 **Release notes**
 
+**lwjPNG v0.06**
+* Constructor of LwjPNG(inputStream) class now performs the init method:
+```java
+ LwjPNG png = new LwjPNG(inputStream); // no init have to be called
+ // than you can png.decode(), scale etc.
+```
+Or alternatively you can read only the png image header with:
+```java
+ LwjPNG png = new LwjPNG(inputStream, false); // read image header only
+
+ int w = png.getWidth(), h = png.getHeight();
+ png.init(true); //than read rest of the compressed data
+
+ // and decode, scale etc. into ByteBuffer
+ ByteBuffer buffer = png.decode();
+```
+
 **lwjPNG v0.05**
 * class LwjPNG is now instantiated, for better OOP.
 Usage example follows:
@@ -31,7 +48,7 @@ Usage example follows:
 
  // and decode, scale etc.
  // after decoding or scaling getRGB(x, y); 
- // and setRGBgetRGB(x, y, argb); can be called
+ // and setRGB(x, y, argb); can be called
  ByteBuffer buffer = png.decode();
 ```
 

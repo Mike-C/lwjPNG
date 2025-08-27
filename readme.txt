@@ -1,8 +1,11 @@
-24 & 32 bit Lightweight Java PNG decoder to RGBA; (c) 2017 rdavidian71@gmail.com v0.05
+24 & 32 bit Lightweight Java PNG decoder to RGBA; (c) 2017 rdavidian71@gmail.com v0.06
 
 You are using this software at your own risk. Author does not bear any responsibility for potential damage concerning it's use.
 
 Version notes:
+
+lwjPNG v0.06
+* Constructor of LwjPNG(inputStream) class now does the init method
 
 lwjPNG v0.05
 * class LwjPNG is now instantiated, for better OOP
